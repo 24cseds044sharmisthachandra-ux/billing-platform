@@ -1,0 +1,5 @@
+import { z } from 'zod';
+export const validate = (schema) => (req, res, next) => { const result = schema.safeParse(req.body); if (!result.success) return res.status(400).json({ message: 'Validation failed', errors: result.error.flatten().fieldErrors }); req.body = result.data; next(); };
+export const productInput = z.object({ name: z.string().min(2), sku: z.string().min(2), category: z.string().optional(), price: z.coerce.number().nonnegative(), cost: z.coerce.number().nonnegative().optional(), reorderLevel: z.coerce.number().int().nonnegative().optional(), description: z.string().optional(), active: z.boolean().optional() });
+export const customerInput = z.object({ name: z.string().min(2), email: z.string().email(), phone: z.string().optional(), company: z.string().optional(), address: z.string().optional(), notes: z.string().optional() });
+export const couponInput = z.object({ code: z.string().min(3), type: z.enum(['percentage', 'fixed']), value: z.coerce.number().positive(), minOrderAmount: z.coerce.number().nonnegative().optional(), usageLimit: z.coerce.number().int().nonnegative().optional(), expiresAt: z.coerce.date(), active: z.boolean().optional() });

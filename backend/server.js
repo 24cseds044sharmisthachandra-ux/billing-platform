@@ -1,0 +1,23 @@
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
+import 'express-async-errors';
+import { connectDB } from './config/db.js';
+import { seedAdmin } from './controllers/authController.js';
+import authRoutes from './routes/authRoutes.js';
+import stockRoutes from './routes/stockRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import { resourceRoutes, productInput, customerInput, couponInput } from './routes/resourceRoutes.js';
+import { dashboard } from './controllers/dashboardController.js';
+import { protect } from './middleware/auth.js';
+import { notFound, errorHandler } from './middleware/error.js';
+
+const app = express();
+app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
+app.use(express.json()); app.use(morgan('dev'));
+app.get('/api/health', (req, res) => res.json({ status: 'ok', service: 'inventory-hub' }));
+app.use('/api/auth', authRoutes); app.use('/api/products', resourceRoutes('products', productInput)); app.use('/api/customers', resourceRoutes('customers', customerInput)); app.use('/api/coupons', resourceRoutes('coupons', couponInput)); app.use('/api/stock', stockRoutes); app.use('/api/orders', orderRoutes); app.get('/api/dashboard', protect, dashboard);
+app.use(notFound); app.use(errorHandler);
+const port = process.env.PORT || 5000;
+connectDB().then(seedAdmin).then(() => app.listen(port, () => console.log(`API running at http://localhost:${port}`))).catch(error => { console.error(error); process.exit(1); });

@@ -1,0 +1,7 @@
+import { Product, Customer, Coupon } from '../models/index.js';
+const resources = { products: Product, customers: Customer, coupons: Coupon };
+export function list(resource) { return async (req, res) => { const Model = resources[resource]; const query = req.query.search ? { $or: [{ name: { $regex: req.query.search, $options: 'i' } }, { sku: { $regex: req.query.search, $options: 'i' } }, { email: { $regex: req.query.search, $options: 'i' } }, { code: { $regex: req.query.search, $options: 'i' } }] } : {}; res.json(await Model.find(query).sort({ createdAt: -1 })); }; }
+export function getOne(resource) { return async (req, res) => { const item = await resources[resource].findById(req.params.id); if (!item) return res.status(404).json({ message: 'Record not found' }); res.json(item); }; }
+export function create(resource) { return async (req, res) => res.status(201).json(await resources[resource].create(req.body)); }
+export function update(resource) { return async (req, res) => { const item = await resources[resource].findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true }); if (!item) return res.status(404).json({ message: 'Record not found' }); res.json(item); }; }
+export function remove(resource) { return async (req, res) => { const item = await resources[resource].findByIdAndDelete(req.params.id); if (!item) return res.status(404).json({ message: 'Record not found' }); res.json({ message: 'Record deleted' }); }; }

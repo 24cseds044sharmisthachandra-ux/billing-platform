@@ -18,7 +18,7 @@ services:
       - key: CLIENT_URL
         sync: false
 
-  - type: static
+  - type: static_site
     name: billing-platform-web
     rootDir: frontend
     buildCommand: npm install && npm run build
